@@ -1,7 +1,8 @@
 // tailwind.config.js
 module.exports = {
   content: [
-    "./src/**/*.{js,jsx,ts,tsx}", // Tailwind will scan these files for class names
+    "./index.html",                   // Add this to enable Tailwind to scan root HTML
+    "./src/**/*.{js,jsx,ts,tsx}",     // Scan all JS/TS files in src/
   ],
   theme: {
     extend: {},
