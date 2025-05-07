@@ -1,3 +1,4 @@
+//#frontend/public/src/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { getUserDashboard } from "../components/services/api"; // Ensure this function exists in your api.js
 
@@ -8,19 +9,20 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("access_token"); // Retrieve correct token key
 
       if (!token) {
         // Redirect to login if token doesn't exist
-        window.location.href = "/";
+        window.location.href = "/"; // Or use navigate() if you're using react-router
         return;
       }
 
       try {
         const data = await getUserDashboard(token);
-        setUserData(data);
+        setUserData(data); // Assuming this is the structure of the response
       } catch (err) {
-        setError("Failed to fetch dashboard data");
+        // Handling error and displaying actual message
+        setError(err.message || "Failed to fetch dashboard data");
       } finally {
         setLoading(false);
       }
