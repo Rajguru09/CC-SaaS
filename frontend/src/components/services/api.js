@@ -1,5 +1,5 @@
 // frontend/src/components/services/api.js
-const API_BASE_URL = "http://localhost:8000"; // change this in production
+const API_BASE_URL = "http://65.2.148.46:8000"; // change this in production
 
 // Utility to handle response and errors
 const handleResponse = async (res) => {
