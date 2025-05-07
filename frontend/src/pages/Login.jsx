@@ -1,4 +1,4 @@
-//#frontend/src/pages/Login.jsx
+// frontend/src/pages/Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -28,7 +28,7 @@ export default function Login() {
     setError(null);    // Reset previous errors
 
     try {
-      const res = await fetch("http://localhost:8000/auth/login", {
+      const res = await fetch("http://65.2.148.46:8000/auth/login", {  // Ensure this URL is correct
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -76,6 +76,11 @@ export default function Login() {
           {loading ? "Logging in..." : "Login"}
         </button>
       </form>
+      <div className="mt-4">
+        <p className="text-sm">
+          Don't have an account? <a href="/signup" className="text-blue-600">Sign up here</a>
+        </p>
+      </div>
     </div>
   );
 }
