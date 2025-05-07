@@ -1,11 +1,12 @@
+# backend/app/main.py
 from fastapi import FastAPI
-from app.api import auth, users  # Optional, if you’ve created routers
+from app.api import auth, users  # Import the routers
 
 app = FastAPI()
 
-# Optional: include routers
-# app.include_router(auth.router, prefix="/auth")
-# app.include_router(users.router, prefix="/users")
+# Include the routers for authentication and users
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(users.router, prefix="/users", tags=["users"])
 
 @app.get("/")
 def root():
