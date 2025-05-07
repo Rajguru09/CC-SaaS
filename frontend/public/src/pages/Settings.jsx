@@ -1,11 +1,18 @@
+import { useNavigate } from "react-router-dom";
+
 export default function Settings() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const handleLogout = () => {
     localStorage.removeItem('token');
-    window.location.href = "/";
+    navigate("/");  // Use react-router navigate for redirect
   };
 
   const handleDownloadReports = () => {
+    setLoading(true);  // Start loading
     alert("Download Reports functionality coming soon!");
+    setLoading(false);  // End loading
   };
 
   return (
@@ -15,8 +22,9 @@ export default function Settings() {
         <button
           onClick={handleDownloadReports}
           className="bg-blue-600 text-white px-4 py-2 rounded"
+          disabled={loading}  // Disable the button while loading
         >
-          Download Reports
+          {loading ? "Downloading..." : "Download Reports"}
         </button>
         <br />
         <button
