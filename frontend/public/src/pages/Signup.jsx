@@ -1,3 +1,4 @@
+//frontend/public/src/pages/Signup.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,6 +14,13 @@ export default function Signup() {
     setLoading(true);
     setError(''); // Clear any previous errors
 
+    // Basic validation for email and password
+    if (!email || !password) {
+      setError('Please fill in both email and password.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch('http://localhost:8000/signup', {
         method: 'POST',
@@ -25,7 +33,7 @@ export default function Signup() {
       if (res.ok) {
         localStorage.setItem('token', data.access_token);
         alert('Signup successful!');
-        navigate('/dashboard');  // Use React Router for navigation
+        navigate('/dashboard');  // Navigate to dashboard on success
       } else {
         setError(data.detail || 'Signup failed');
       }
@@ -57,7 +65,7 @@ export default function Signup() {
           disabled={loading}  // Disable inputs while loading
         />
         <button
-          className="bg-blue-600 text-white px-4 py-2"
+          className="bg-blue-600 text-white px-4 py-2 w-full"
           type="submit"
           disabled={loading}  // Disable button while loading
         >
