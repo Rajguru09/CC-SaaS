@@ -31,6 +31,12 @@ unzip awscliv2.zip
 sudo ./aws/install
 aws --version
 
+
+
+For Start the application:
+uvicorn app.main:app --reload --host 0.0.0.0
+
+
 Then configure it (if needed):
 
 aws configure
