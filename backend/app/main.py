@@ -1,10 +1,11 @@
 from fastapi import FastAPI
-from app.api import users  # Ensure users is imported
+from app.api import auth, users  # Import routers
 
 app = FastAPI()
 
-# Include the users router
-app.include_router(users.router, prefix="/users")
+# Include routers with the correct prefix
+app.include_router(auth.router, prefix="/auth")
+app.include_router(users.router, prefix="/users")  # Ensure '/users' is correctly included
 
 @app.get("/")
 def root():
