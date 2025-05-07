@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import auth, users  # Import routers
+
+# Import the routers (Ensure these are correctly imported based on your actual project structure)
+from app.api import auth, users
 
 # Initialize the FastAPI app
 app = FastAPI()
@@ -15,9 +17,10 @@ app.add_middleware(
 )
 
 # Include routers with the correct prefix
-app.include_router(auth.router, prefix="/auth")
-app.include_router(users.router, prefix="/users")  # Ensure '/users' is correctly included
+app.include_router(auth.router, prefix="/auth")  # Authentication routes (Login, Signup, etc.)
+app.include_router(users.router, prefix="/users")  # User-related routes (profile, etc.)
 
+# Root endpoint (for testing)
 @app.get("/")
 def root():
     return {"message": "Welcome to CleanCloud backend!"}
