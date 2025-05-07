@@ -1,6 +1,6 @@
 fastapi
 uvicorn
-python-jose[cryptography]
-passlib[bcrypt]
 boto3
-pydantic
+python-dotenv
+python-jose
+passlib[bcrypt]
