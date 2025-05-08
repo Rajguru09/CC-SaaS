@@ -45,6 +45,7 @@ const fetchAPI = async (url, method, data = null, token = null) => {
 // API Calls
 
 export async function signupUser(userData) {
+  console.log("Signup payload:", userData);
   return fetchAPI('/auth/signup', 'POST', userData);
 }
 
