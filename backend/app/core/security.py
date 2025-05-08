@@ -23,7 +23,7 @@ def create_access_token(data: dict, expires_delta: int = 60*60):
     # Try to encode the token and catch potential errors
     try:
         token = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
-        logger.info("Access token successfully created.")
+        logger.info(f"Access token successfully created for {data.get('sub')}.")
         return token
     except Exception as e:
         logger.error(f"Error creating access token: {e}")
