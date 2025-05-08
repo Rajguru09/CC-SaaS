@@ -38,19 +38,23 @@ export default function Signup() {
       // 🛠️ Send all three fields to the backend
       const response = await signupUser({ email, password, confirm_password: confirmPassword });
 
-      if (response.access_token) {
+      if (response?.access_token) {
         localStorage.setItem("access_token", response.access_token);
         setLoading(false);
+        setError(null);  // Clear any previous errors on successful signup
         navigate("/login"); // ✅ Navigate to login after successful signup
       } else {
         setLoading(false);
-        setError(response.detail || "Signup failed.");
+        setError(response?.detail || "Signup failed.");
       }
     } catch (err) {
       setLoading(false);
-      // General error handling
-      const errorMessage = err?.response?.data?.detail || "An error occurred. Please try again.";
-      setError(errorMessage);
+      // Enhanced error handling for frontend
+      if (err.response && err.response.data && err.response.data.detail) {
+        setError(err.response.data.detail);
+      } else {
+        setError("An error occurred. Please try again.");
+      }
     }
   };
 
