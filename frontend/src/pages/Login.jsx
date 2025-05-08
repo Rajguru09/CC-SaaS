@@ -2,6 +2,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Assuming VITE_API_BASE_URL is set in environment variables
+const API_URL = import.meta.env.VITE_API_BASE_URL;
+
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -12,11 +15,13 @@ export default function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
+    // Basic input validation
     if (!email || !password) {
       setError("Please fill in both email and password.");
       return;
     }
 
+    // Email format validation
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email.");
@@ -27,7 +32,7 @@ export default function Login() {
     setError(null);
 
     try {
-      const res = await fetch("http://65.2.148.46:8000/auth/login", {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -37,9 +42,11 @@ export default function Login() {
       setLoading(false);
 
       if (res.ok && data.access_token) {
+        // Store token and navigate to dashboard
         localStorage.setItem("access_token", data.access_token);
         navigate("/dashboard");
       } else {
+        // Display error message from API
         setError(data.detail || "Login failed. Please try again.");
       }
     } catch (err) {
@@ -82,7 +89,11 @@ export default function Login() {
             disabled={loading}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 w-full"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? (
+              <span className="animate-spin">🔄</span> // You can replace this with a spinner component if needed
+            ) : (
+              "Login"
+            )}
           </button>
         </form>
 
