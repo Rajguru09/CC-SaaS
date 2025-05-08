@@ -32,7 +32,7 @@ export default function Signup() {
     }
 
     setLoading(true);
-    setError(null);
+    setError(null);  // Clear any previous errors
 
     try {
       // 🛠️ Send all three fields to the backend
@@ -48,7 +48,9 @@ export default function Signup() {
       }
     } catch (err) {
       setLoading(false);
-      setError(err.response?.data?.detail || "An error occurred. Please try again.");
+      // General error handling
+      const errorMessage = err?.response?.data?.detail || "An error occurred. Please try again.";
+      setError(errorMessage);
     }
   };
 
