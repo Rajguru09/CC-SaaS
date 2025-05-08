@@ -1,16 +1,17 @@
 #backend/app/models/user.py
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, model_validator
 
 class UserCreate(BaseModel):
     email: EmailStr
-    password: str = Field(..., min_length=8, description="Password must be at least 8 characters long")
+    password: str = Field(..., min_length=8)
+    confirm_password: str
 
-    @validator('password')
-    def validate_password(cls, v):
-        if len(v) < 8:
-            raise ValueError('Password must be at least 8 characters long')
-        return v
-
+    @model_validator(mode='after')
+    def validate_passwords(self):
+        if self.password != self.confirm_password:
+            raise ValueError("Passwords do not match")
+        return self
+        
 class UserOut(BaseModel):
     uid: str
     email: EmailStr
