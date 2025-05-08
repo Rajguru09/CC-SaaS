@@ -1,19 +1,21 @@
 //#frontend/src/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import { getUserDashboard } from "../components/services/api"; // Ensure this function exists in your api.js
 
 export default function Dashboard() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      const token = localStorage.getItem("access_token"); // Retrieve correct token key
+      const token = localStorage.getItem("access_token"); // Retrieve the correct token key
 
       if (!token) {
-        // Redirect to login if token doesn't exist
-        window.location.href = "/"; // Or use navigate() if you're using react-router
+        // Redirect to login if token doesn't exist using navigate()
+        navigate("/login");
         return;
       }
 
@@ -29,7 +31,7 @@ export default function Dashboard() {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [navigate]); // Add navigate to dependency array
 
   if (loading) {
     return <div>Loading...</div>;
@@ -49,7 +51,7 @@ export default function Dashboard() {
         <h2 className="text-lg font-semibold">User Data:</h2>
         <pre className="mt-2 bg-gray-100 p-4 rounded">{JSON.stringify(userData, null, 2)}</pre>
       </div>
-      
+
       {/* Example of adding some action */}
       <div className="mt-4">
         <button className="bg-blue-600 text-white px-4 py-2 rounded">
