@@ -27,7 +27,7 @@ def signup(user_data: UserCreate):
             "uid": uid,
             "email": user_data.email,
             "password": hashed_pwd,
-            "role": "basic"  # Default role if not provided, you can change this based on your logic
+            "role": "basic"  # Default role if not provided
         })
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error saving user: {str(e)}")
@@ -37,7 +37,6 @@ def signup(user_data: UserCreate):
 
     # Return the JWT token for authentication
     return {"access_token": token, "token_type": "bearer"}
-
 
 # Login route
 @router.post("/login", response_model=TokenOut)
