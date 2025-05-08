@@ -8,7 +8,7 @@ import Settings from "../pages/Settings";
 
 // Protected route component
 const ProtectedRoute = ({ element }) => {
-  const isAuthenticated = localStorage.getItem("auth_token"); // Check if user is authenticated
+  const isAuthenticated = localStorage.getItem("access_token"); // Check if user is authenticated
   return isAuthenticated ? element : <Navigate to="/login" replace />;
 };
 
