@@ -1,4 +1,3 @@
-#backend/app/models/user.py
 from pydantic import BaseModel, EmailStr, Field, model_validator
 
 class UserCreate(BaseModel):
@@ -12,6 +11,10 @@ class UserCreate(BaseModel):
             raise ValueError("Passwords do not match")
         return self
         
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
 class UserOut(BaseModel):
     uid: str
     email: EmailStr
