@@ -8,24 +8,30 @@ import uuid
 router = APIRouter()
 
 @router.post("/signup", response_model=TokenOut)
-def signup(user: UserCreate):
-    existing_user = table.get_item(Key={"email": user.email})
-    if "Item" in existing_user:
+def signup(user_data: UserCreate):
+    # Check if the email already exists
+    response = table.get_item(Key={"email": user_data.email})
+    if response.get("Item"):
         raise HTTPException(status_code=400, detail="Email already registered")
-    
+
     uid = str(uuid.uuid4())
-    hashed_pwd = hash_password(user.password)
-    table.put_item(Item={"uid": uid, "email": user.email, "password": hashed_pwd})
-    
-    token = create_access_token({"sub": user.email, "uid": uid})
+    hashed_pwd = hash_password(user_data.password)
+
+    table.put_item(Item={
+        "uid": uid,
+        "email": user_data.email,
+        "password": hashed_pwd
+    })
+
+    token = create_access_token({"sub": user_data.email, "uid": uid})
     return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/login", response_model=TokenOut)
-def login(user: UserLogin):
-    response = table.get_item(Key={"email": user.email})
+def login(user_data: UserLogin):
+    response = table.get_item(Key={"email": user_data.email})
     db_user = response.get("Item")
-    if not db_user or not verify_password(user.password, db_user["password"]):
+    if not db_user or not verify_password(user_data.password, db_user["password"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    token = create_access_token({"sub": user.email, "uid": db_user["uid"]})
+
+    token = create_access_token({"sub": user_data.email, "uid": db_user["uid"]})
     return {"access_token": token, "token_type": "bearer"}
