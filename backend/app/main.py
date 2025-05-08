@@ -6,8 +6,9 @@ app = FastAPI()
 
 # Update this based on where your frontend is served
 allowed_origins = [
-    "http://localhost:5173",  # Vite dev server
-    "https://yourfrontenddomain.com",  # Production domain
+    "http://localhost:3001",         # ✅ Vite local dev
+    "http://172.19.108.220:3001",    # ✅ LAN IP if accessing from other devices
+    "https://yourfrontenddomain.com" # Optional production domain
 ]
 
 app.add_middleware(
