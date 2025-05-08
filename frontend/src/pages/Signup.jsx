@@ -13,7 +13,8 @@ export default function Signup() {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    
+
+    // Input validations
     if (!email || !password || !confirmPassword) {
       setError("Please fill in all fields.");
       return;
@@ -34,30 +35,32 @@ export default function Signup() {
     setError(null);
 
     try {
-      const data = await signupUser({ email, password });
-      setLoading(false);
+      // 🛠️ Send all three fields to the backend
+      const response = await signupUser({ email, password, confirm_password: confirmPassword });
 
-      if (data.access_token) {
-        localStorage.setItem("access_token", data.access_token);
-        navigate("/dashboard");
+      if (response.access_token) {
+        localStorage.setItem("access_token", response.access_token);
+        setLoading(false);
+        navigate("/login"); // ✅ Navigate to login after successful signup
       } else {
-        setError(data.detail || "Signup failed");
+        setLoading(false);
+        setError(response.detail || "Signup failed.");
       }
     } catch (err) {
       setLoading(false);
-      setError("An error occurred. Please try again later.");
+      setError(err.response?.data?.detail || "An error occurred. Please try again.");
     }
   };
 
   return (
     <div className="p-8 max-w-sm mx-auto">
       <h2 className="text-2xl font-bold text-center mb-6">Welcome to Tech Solution</h2>
-      
+
       <div className="bg-white p-6 shadow-md rounded-lg">
         <h3 className="text-xl font-semibold mb-4 text-center">Sign Up</h3>
-        
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>} 
-        
+
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
         <form onSubmit={handleSignup}>
           <input
             className="border p-2 w-full mb-4"
@@ -65,6 +68,7 @@ export default function Signup() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            required
           />
           <input
             className="border p-2 w-full mb-4"
@@ -72,6 +76,7 @@ export default function Signup() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
           />
           <input
             className="border p-2 w-full mb-4"
@@ -79,10 +84,11 @@ export default function Signup() {
             placeholder="Confirm Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
+            required
           />
-          
+
           <button
-            className="bg-blue-600 text-white px-4 py-2 w-full"
+            className="bg-blue-600 text-white px-4 py-2 w-full rounded"
             type="submit"
             disabled={loading}
           >
