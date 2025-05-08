@@ -1,5 +1,4 @@
 ##backend/app/main.py
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -18,7 +17,7 @@ allowed_origins = [
 # Add CORS middleware for cross-origin requests
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,  # Specify origins that are allowed
+    allow_origins=allowed_origins,  # Use the allowed_origins list
     allow_credentials=True,
     allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],  # Allows all headers
