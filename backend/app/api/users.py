@@ -8,14 +8,19 @@ router = APIRouter()
 async def get_users():
     try:
         # Scan the DynamoDB table to fetch all users (not efficient for large tables)
+        # For large data, consider optimizing with query or pagination
         response = table.scan()
         users = response.get("Items", [])
+        
+        if not users:
+            # Return an empty list if no users are found
+            raise HTTPException(status_code=404, detail="No users found")
+        
         return {"users": users}
     except Exception as e:
         # If an error occurs, raise a 500 Internal Server Error
         raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
 
-# Example of getting a single user by UID
 @router.get("/{uid}")
 async def get_user(uid: str):
     try:
@@ -23,7 +28,7 @@ async def get_user(uid: str):
         response = table.get_item(Key={"uid": uid})
         user = response.get("Item")
         
-        if user is None:
+        if not user:
             # If no user is found, raise a 404 Not Found error
             raise HTTPException(status_code=404, detail="User not found")
         
