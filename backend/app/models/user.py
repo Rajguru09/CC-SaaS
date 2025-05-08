@@ -26,4 +26,4 @@ class TokenOut(BaseModel):
 
     class Config:
         # Allow extra fields to be passed if needed for future expansion
-        anystr_strip_whitespace = True
+        str_strip_whitespace = True
