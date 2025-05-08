@@ -26,13 +26,13 @@ export default function Login() {
       // Send email and password to backend for login
       const response = await loginUser({ email, password });
 
-      if (response.access_token) {
+      if (response?.access_token) {
         localStorage.setItem("access_token", response.access_token);
         setLoading(false);
         navigate("/dashboard");  // Redirect to dashboard on successful login
       } else {
         setLoading(false);
-        setError(response.detail || "Login failed.");
+        setError(response?.detail || "Login failed.");
       }
     } catch (err) {
       setLoading(false);
@@ -52,22 +52,27 @@ export default function Login() {
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
         <form onSubmit={handleLogin}>
-          <input
-            className="border p-2 w-full mb-4"
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            className="border p-2 w-full mb-4"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="mb-4">
+            <input
+              className="border p-2 w-full"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <input
+              className="border p-2 w-full"
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
 
           <button
             className="bg-blue-600 text-white px-4 py-2 w-full rounded"
