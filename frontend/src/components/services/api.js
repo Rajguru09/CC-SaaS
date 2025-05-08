@@ -58,6 +58,7 @@ export async function signupUser(userData) {
 
 // User login
 export async function loginUser(userData) {
+  console.log("Login payload:", userData);  // Debugging log
   return fetchAPI('/auth/login', 'POST', userData);
 }
 
