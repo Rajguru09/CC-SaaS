@@ -1,4 +1,3 @@
-# app/services/user.py #
 import uuid
 import boto3
 from botocore.exceptions import ClientError
@@ -6,12 +5,16 @@ from passlib.context import CryptContext
 import os
 
 # Set DynamoDB region and table name according to your environment
-dynamodb = boto3.resource('dynamodb', region_name='ap-south-1')  # Correct region
-table = dynamodb.Table('users')  # Correct table name
+dynamodb = boto3.resource('dynamodb', region_name=os.getenv('AWS_REGION', 'ap-south-1'))  # Using environment variable for region
+table = dynamodb.Table(os.getenv('DYNAMODB_TABLE', 'users'))  # Table name from environment variable
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def create_user(user_data):
+    # Validate input data
+    if not user_data.get('email') or not user_data.get('password'):
+        raise ValueError("Email and password are required fields.")
+
     user_id = str(uuid.uuid4())
     hashed_password = pwd_context.hash(user_data.password)
 
@@ -31,11 +34,12 @@ def create_user(user_data):
         if e.response['Error']['Code'] == "ConditionalCheckFailedException":
             raise ValueError("User with this email already exists.")
         else:
-            raise  # Raise any other errors
+            # Log and raise other errors
+            raise RuntimeError(f"Failed to create user: {e.response['Error']['Message']}")
 
     # Return user data without the password for security purposes
     return {
         "uid": user_id,
         "email": user_data.email,
-        "role": "basic"  # Default role, can be customized if needed
+        "role": "basic"  # Default role
     }
