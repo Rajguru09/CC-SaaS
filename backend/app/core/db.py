@@ -1,6 +1,6 @@
 import boto3
 from botocore.exceptions import ClientError
-from app.core.config import settings  # Assuming this is a settings file containing environment variables
+from app.core.settings import settings  # Assuming settings is where AWS-related configurations are stored
 
 # Initialize DynamoDB resource and client with the correct region from settings
 dynamodb = boto3.resource("dynamodb", region_name=settings.AWS_REGION)  # Use region from config settings
