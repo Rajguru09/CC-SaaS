@@ -1,4 +1,3 @@
-# backend/app/api/users.py
 from fastapi import APIRouter, HTTPException, Depends
 from app.core.db import table
 from app.models.user import User
@@ -37,8 +36,11 @@ async def get_user(email: str):
 @router.get("/dashboard")
 async def get_dashboard(user: User = Depends(get_current_user)):  # Assuming you have a dependency to get the current user from JWT
     try:
+        # Use the user's UID to fetch their dashboard data
         response = table.get_item(Key={"uid": user.uid})
-        if not response.get("Item"):
+        
+        # Ensure proper response handling for DynamoDB
+        if 'Item' not in response:
             raise HTTPException(status_code=404, detail="User data not found")
         
         return {"dashboard": response["Item"]}  # Customize based on your dashboard data
