@@ -13,20 +13,18 @@ export default function AWSCredentials() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Basic client-side validation (You can replace it with actual backend API validation)
     if (!accessKey || !secretKey) {
       setError("Both AWS Access Key and Secret Key are required.");
       return;
     }
 
     try {
-      // Example: Make API request to verify AWS credentials
       const isValidCredentials = await validateAWSCredentials(accessKey, secretKey);
-      
+
       if (isValidCredentials) {
         localStorage.setItem("aws_access_key", accessKey);
         localStorage.setItem("aws_secret_key", secretKey);
-        navigate(redirectTo); // Redirect based on previous page
+        navigate(redirectTo);
       } else {
         setError("Invalid AWS credentials. Please try again.");
       }
@@ -36,7 +34,6 @@ export default function AWSCredentials() {
   };
 
   const validateAWSCredentials = async (accessKey, secretKey) => {
-    // Replace with a real backend API call to validate the AWS credentials
     try {
       const response = await fetch("/api/validate-aws-credentials", {
         method: "POST",
@@ -44,7 +41,7 @@ export default function AWSCredentials() {
         body: JSON.stringify({ accessKey, secretKey }),
       });
       const data = await response.json();
-      return data.isValid; // Assuming the backend returns { isValid: true } or { isValid: false }
+      return data.isValid;
     } catch (err) {
       console.error("Error validating credentials:", err);
       return false;
@@ -52,31 +49,38 @@ export default function AWSCredentials() {
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Enter AWS Credentials</h2>
+    <div className="p-8 max-w-md mx-auto">
+      <div className="bg-blue-100 p-6 rounded-lg shadow mb-6 text-center">
+        <h1 className="text-2xl font-bold text-blue-800 mb-1">Welcome to Tech Solution</h1>
+        <p className="text-gray-700">Securely connect your AWS account</p>
+      </div>
 
-      {error && <p className="text-red-600 mb-4">{error}</p>}
+      {error && <p className="text-red-600 text-sm mb-4 text-center">{error}</p>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="bg-white border rounded-lg p-6 shadow-md">
+        <label className="block mb-2 font-medium text-gray-700">AWS Access Key</label>
         <input
-          className="border p-2 w-full mb-4"
+          className="border p-2 w-full mb-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           type="text"
-          placeholder="AWS Access Key"
+          placeholder="Enter your AWS Access Key"
           value={accessKey}
           onChange={(e) => setAccessKey(e.target.value)}
           required
         />
+
+        <label className="block mb-2 font-medium text-gray-700">AWS Secret Key</label>
         <input
-          className="border p-2 w-full mb-4"
+          className="border p-2 w-full mb-6 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
           type="password"
-          placeholder="AWS Secret Key"
+          placeholder="Enter your AWS Secret Key"
           value={secretKey}
           onChange={(e) => setSecretKey(e.target.value)}
           required
         />
+
         <button
           type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded w-full"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 w-full rounded"
         >
           Connect
         </button>
