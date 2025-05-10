@@ -1,7 +1,7 @@
 // frontend/src/pages/Login.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../components/services/api";  // This will be a new function to handle login requests
+import { loginUser } from "../components/services/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,34 +10,47 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Input validations
     if (!email || !password) {
       setError("Please fill in both email and password.");
       return;
     }
 
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     setLoading(true);
-    setError(null);  // Clear any previous errors
+    setError(null);
 
     try {
-      // Send email and password to backend for login
       const response = await loginUser({ email, password });
 
       if (response?.access_token) {
-        // Store the JWT token in localStorage for later use
         localStorage.setItem("access_token", response.access_token);
+        setEmail("");
+        setPassword("");
         setLoading(false);
-        navigate("/dashboard");  // Redirect to dashboard on successful login
+        navigate("/dashboard");
       } else {
         setLoading(false);
-        setError(response?.detail || "Login failed.");
+        setError(response?.detail || "Login failed. Please check your credentials.");
       }
     } catch (err) {
       setLoading(false);
-      // General error handling
       const errorMessage = err?.response?.data?.detail || "An error occurred. Please try again.";
       setError(errorMessage);
     }
@@ -53,27 +66,29 @@ export default function Login() {
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
         <form onSubmit={handleLogin}>
-          <div className="mb-4">
-            <input
-              className="border p-2 w-full"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div className="mb-4">
-            <input
-              className="border p-2 w-full"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <label htmlFor="email" className="sr-only">Email</label>
+          <input
+            id="email"
+            className="border p-2 w-full mb-4"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            aria-label="Email"
+          />
+
+          <label htmlFor="password" className="sr-only">Password</label>
+          <input
+            id="password"
+            className="border p-2 w-full mb-4"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            aria-label="Password"
+          />
 
           <button
             className="bg-blue-600 text-white px-4 py-2 w-full rounded"
