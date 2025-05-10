@@ -51,20 +51,15 @@ def signup(user_data: UserCreate):
 @router.post("/login", response_model=TokenOut)
 def login(user_data: UserLogin):
     # Retrieve the user from DynamoDB based on email
-    try:
-        response = table.get_item(Key={"email": user_data.email})
-        db_user = response.get("Item")
-    except Exception as e:
-        logger.error(f"Error retrieving user from DynamoDB: {e}")
-        raise HTTPException(status_code=500, detail="Error retrieving user data")
+    response = table.get_item(Key={"email": user_data.email})
+    db_user = response.get("Item")
 
     # If the user is not found or the password doesn't match, raise an error
     if not db_user or not verify_password(user_data.password, db_user["password"]):
-        logger.warning(f"Failed login attempt for email: {user_data.email}")
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     # Create a JWT token for the logged-in user
     token = create_access_token({"sub": user_data.email, "uid": db_user["uid"]})
 
-    # Return the JWT token for authentication
-    return {"access_token": token, "token_type": "bearer"}
+    # Return the JWT token for authentication along with user info
+    return {"access_token": token, "token_type": "bearer", "user": db_user}
