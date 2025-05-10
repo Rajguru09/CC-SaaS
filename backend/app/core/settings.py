@@ -2,20 +2,15 @@ import os
 from pydantic import BaseSettings
 
 class Settings(BaseSettings):
-    # AWS Region - default to 'ap-south-1' as per your region
     AWS_REGION: str = os.getenv("AWS_REGION", "ap-south-1")
-
-    # DynamoDB table name
     DYNAMODB_USERS_TABLE_NAME: str = os.getenv("DYNAMODB_USERS_TABLE_NAME", "users")
 
-    # Optional: Add other configurations if needed
-    # AWS_ACCESS_KEY_ID: str
-    # AWS_SECRET_ACCESS_KEY: str
+    # 🔐 JWT Configuration
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your-secret-key")  # Replace with a secure key or load from .env
+    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")  # Default algorithm
 
     class Config:
-        # Load environment variables from a .env file if it exists
         env_file = ".env"
         env_file_encoding = 'utf-8'
 
-# Instance of the settings class to access the configurations
 settings = Settings()
