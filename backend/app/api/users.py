@@ -43,15 +43,15 @@ async def get_user(email: str):
 @router.get("/dashboard")
 async def get_dashboard(user: User = Depends(get_current_user)):  # Assuming you have a dependency to get the current user from JWT
     try:
-        # Use the user's UID to fetch their dashboard data
-        response = table.get_item(Key={"uid": user.uid})
+        # Assuming 'user.email' contains the email of the logged-in user
+        response = table.get_item(Key={"email": user.email})
         
         # Ensure proper response handling for DynamoDB
         if 'Item' not in response:
             raise HTTPException(status_code=404, detail="User data not found")
         
-        logger.info(f"Fetched dashboard data for user {user.uid}")
+        logger.info(f"Fetched dashboard data for user with email {user.email}")
         return {"dashboard": response["Item"]}  # Customize based on your dashboard data
     except Exception as e:
-        logger.error(f"Error fetching dashboard for user {user.uid}: {str(e)}")
+        logger.error(f"Error fetching dashboard for user with email {user.email}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching dashboard: {str(e)}")
