@@ -19,7 +19,7 @@ def signup(user_data: UserCreate):
         if response.get("Item"):
             raise HTTPException(status_code=400, detail="Email already registered")
     except Exception as e:
-        logger.error(f"Error checking email in DynamoDB: {e}")
+        logger.error(f"Error checking email in DynamoDB for {user_data.email}: {e}")
         raise HTTPException(status_code=500, detail="Error checking email availability")
 
     # Generate a unique ID for the user
@@ -38,7 +38,7 @@ def signup(user_data: UserCreate):
         })
         logger.info(f"New user created with email: {user_data.email} and UID: {uid}")
     except Exception as e:
-        logger.error(f"Error saving user to DynamoDB: {e}")
+        logger.error(f"Error saving user {user_data.email} to DynamoDB: {e}")
         raise HTTPException(status_code=500, detail=f"Error saving user: {str(e)}")
 
     # Create the JWT token for the new user
@@ -47,16 +47,26 @@ def signup(user_data: UserCreate):
     # Return the JWT token for authentication
     return {"access_token": token, "token_type": "bearer"}
 
+
 # Login route
 @router.post("/login", response_model=TokenOut)
 def login(user_data: UserLogin):
     # Retrieve the user from DynamoDB based on email
-    response = table.get_item(Key={"email": user_data.email})
-    db_user = response.get("Item")
-
-    # If the user is not found or the password doesn't match, raise an error
-    if not db_user or not verify_password(user_data.password, db_user["password"]):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    try:
+        response = table.get_item(Key={"email": user_data.email})
+        db_user = response.get("Item")
+        
+        if not db_user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        # If the user is not found or the password doesn't match, raise an error
+        if not verify_password(user_data.password, db_user["password"]):
+            logger.warning(f"Failed login attempt for email: {user_data.email}")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+    except Exception as e:
+        logger.error(f"Error retrieving or verifying user {user_data.email}: {e}")
+        raise HTTPException(status_code=500, detail="Error logging in")
 
     # Create a JWT token for the logged-in user
     token = create_access_token({"sub": user_data.email, "uid": db_user["uid"]})
