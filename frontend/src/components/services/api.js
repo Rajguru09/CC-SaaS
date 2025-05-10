@@ -1,4 +1,3 @@
-// frontend/src/components/services/api.js
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Centralized response handler with improved error handling
@@ -58,7 +57,8 @@ export async function signupUser(userData) {
 
 // User login
 export async function loginUser(userData) {
-  return fetchAPI('/auth/login', 'POST', userData);
+  const response = await fetchAPI('/auth/login', 'POST', userData);
+  return response;  // Now returns the full response including user data
 }
 
 // Get user dashboard with token
