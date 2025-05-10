@@ -1,5 +1,5 @@
 // frontend/src/pages/Signup.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupUser } from "../components/services/api";
 
@@ -10,6 +10,14 @@ export default function Signup() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Redirect if user is already logged in
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [navigate]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -31,30 +39,33 @@ export default function Signup() {
       return;
     }
 
+    // Password strength validation
+    if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password)) {
+      setError("Password must be at least 8 characters, include an uppercase letter and a number.");
+      return;
+    }
+
     setLoading(true);
-    setError(null);  // Clear any previous errors
+    setError(null); // Clear previous errors
 
     try {
-      // 🛠️ Send all three fields to the backend
       const response = await signupUser({ email, password, confirm_password: confirmPassword });
 
       if (response?.access_token) {
         localStorage.setItem("access_token", response.access_token);
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
         setLoading(false);
-        setError(null);  // Clear any previous errors on successful signup
-        navigate("/login"); // ✅ Navigate to login after successful signup
+        setError(null);
+        navigate("/login"); // Redirect after successful signup
       } else {
         setLoading(false);
         setError(response?.detail || "Signup failed.");
       }
     } catch (err) {
       setLoading(false);
-      // Enhanced error handling for frontend
-      if (err.response && err.response.data && err.response.data.detail) {
-        setError(err.response.data.detail);
-      } else {
-        setError("An error occurred. Please try again.");
-      }
+      setError("An error occurred. Please try again.");
     }
   };
 
@@ -68,29 +79,40 @@ export default function Signup() {
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
         <form onSubmit={handleSignup}>
+          <label htmlFor="email" className="sr-only">Email</label>
           <input
+            id="email"
             className="border p-2 w-full mb-4"
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            aria-label="Email"
           />
+
+          <label htmlFor="password" className="sr-only">Password</label>
           <input
+            id="password"
             className="border p-2 w-full mb-4"
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            aria-label="Password"
           />
+
+          <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
           <input
+            id="confirmPassword"
             className="border p-2 w-full mb-4"
             type="password"
             placeholder="Confirm Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
+            aria-label="Confirm Password"
           />
 
           <button
