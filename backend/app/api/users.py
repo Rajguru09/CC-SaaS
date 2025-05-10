@@ -1,8 +1,8 @@
+import logging
 from fastapi import APIRouter, HTTPException, Depends
 from app.core.db import table
-from app.models.user import User
+from app.models.user import User, UserOut  # Importing response models
 from app.core.security import get_current_user  # Assuming you have a function to get current user from JWT
-import logging
 
 # Initialize logger
 logger = logging.getLogger(__name__)
@@ -10,7 +10,23 @@ logger.setLevel(logging.INFO)
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("/dashboard", response_model=UserOut)  # Returning user dashboard data
+async def get_dashboard(user: User = Depends(get_current_user)):  # Assuming you have a dependency to get the current user from JWT
+    try:
+        # Assuming 'user.email' contains the email of the logged-in user
+        response = table.get_item(Key={"email": user.email})
+        
+        # Ensure proper response handling for DynamoDB
+        if 'Item' not in response:
+            raise HTTPException(status_code=404, detail="User data not found")
+        
+        logger.info(f"Fetched dashboard data for user with email {user.email}")
+        return response["Item"]  # Customize based on your dashboard data
+    except Exception as e:
+        logger.exception(f"Error fetching dashboard for user with email {user.email}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.get("/", response_model=dict[str, list[UserOut]])  # Response model is now a list of users
 async def get_users():
     try:
         response = table.scan()
@@ -21,10 +37,10 @@ async def get_users():
         
         return {"users": users}
     except Exception as e:
-        logger.error(f"Error fetching users: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
+        logger.exception("Error fetching users")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
-@router.get("/{email}")
+@router.get("/{email}", response_model=UserOut)  # Return a single user from email
 async def get_user(email: str):
     try:
         # Use email as the primary key to fetch the user
@@ -36,22 +52,5 @@ async def get_user(email: str):
         
         return {"user": user}
     except Exception as e:
-        logger.error(f"Error fetching user with email {email}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error fetching user: {str(e)}")
-
-# Dashboard route - fetch user data for the logged-in user
-@router.get("/dashboard")
-async def get_dashboard(user: User = Depends(get_current_user)):  # Assuming you have a dependency to get the current user from JWT
-    try:
-        # Assuming 'user.email' contains the email of the logged-in user
-        response = table.get_item(Key={"email": user.email})
-        
-        # Ensure proper response handling for DynamoDB
-        if 'Item' not in response:
-            raise HTTPException(status_code=404, detail="User data not found")
-        
-        logger.info(f"Fetched dashboard data for user with email {user.email}")
-        return {"dashboard": response["Item"]}  # Customize based on your dashboard data
-    except Exception as e:
-        logger.error(f"Error fetching dashboard for user with email {user.email}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error fetching dashboard: {str(e)}")
+        logger.exception(f"Error fetching user with email {email}")
+        raise HTTPException(status_code=500, detail="Internal server error")
