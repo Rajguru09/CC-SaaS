@@ -5,7 +5,10 @@ class Settings(BaseSettings):
     # AWS Region - default to 'ap-south-1' as per your region
     AWS_REGION: str = os.getenv("AWS_REGION", "ap-south-1")
 
-    # Optional: Add more settings for AWS access keys or other configurations if needed
+    # DynamoDB table name
+    DYNAMODB_USERS_TABLE_NAME: str = os.getenv("DYNAMODB_USERS_TABLE_NAME", "users")
+
+    # Optional: Add other configurations if needed
     # AWS_ACCESS_KEY_ID: str
     # AWS_SECRET_ACCESS_KEY: str
 
