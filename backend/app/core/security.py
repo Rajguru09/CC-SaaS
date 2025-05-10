@@ -1,4 +1,4 @@
-# backend/app/core/security.py
+from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
@@ -11,17 +11,14 @@ import logging
 # Set up logger for better debugging and error handling
 logger = logging.getLogger(__name__)
 
+# OAuth2 scheme to extract token from Authorization header
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 # Initialize password context for hashing and verifying passwords
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Function to create an access token (JWT)
 def create_access_token(data: dict, expires_delta: int = 3600):
-    """
-    Creates an access token with an expiration time.
-    :param data: The data to be encoded in the JWT (e.g., user email, UID).
-    :param expires_delta: The time in seconds until the token expires. Default is 1 hour (3600 seconds).
-    :return: JWT as a string.
-    """
     to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(seconds=expires_delta)
     to_encode.update({"exp": expire})
@@ -39,12 +36,6 @@ def create_access_token(data: dict, expires_delta: int = 3600):
 
 # Function to verify if the provided plain password matches the hashed password
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Verifies if the provided plain password matches the hashed password.
-    :param plain_password: The password entered by the user.
-    :param hashed_password: The hashed password stored in the database.
-    :return: Boolean indicating whether the passwords match.
-    """
     try:
         is_verified = pwd_context.verify(plain_password, hashed_password)
         if is_verified:
@@ -58,11 +49,6 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 # Function to hash a plain password using bcrypt
 def hash_password(password: str) -> str:
-    """
-    Hashes the plain password using bcrypt.
-    :param password: The plain text password to be hashed.
-    :return: The hashed password.
-    """
     try:
         hashed_pw = pwd_context.hash(password)
         logger.info("Password successfully hashed.")
@@ -81,11 +67,6 @@ def decode_jwt(token: str):
 
 # Dependency to get the current user from the JWT token
 def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
-    """
-    Extracts the user from the JWT token.
-    :param token: The JWT token passed in the request header.
-    :return: The User object corresponding to the JWT token's subject (UID).
-    """
     try:
         payload = decode_jwt(token)
         user = get_user_by_uid(payload["sub"])  # Fetch user from database using UID (assuming 'sub' is UID)
