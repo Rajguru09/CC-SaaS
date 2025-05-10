@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Signup from "../pages/Signup";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
@@ -9,9 +9,10 @@ import jwtDecode from 'jwt-decode'; // For decoding JWT token
 // Protected route component with token expiry check
 const ProtectedRoute = ({ element }) => {
   const token = localStorage.getItem("access_token");
+  const location = useLocation();
 
   if (!token) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   try {
@@ -20,11 +21,11 @@ const ProtectedRoute = ({ element }) => {
 
     if (isExpired) {
       localStorage.removeItem("access_token"); // Remove expired token
-      return <Navigate to="/login" replace />;
+      return <Navigate to="/login" state={{ from: location }} replace />;
     }
   } catch (error) {
     localStorage.removeItem("access_token"); // Remove invalid token
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   return element;
@@ -49,7 +50,7 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        
+
         {/* Protected routes */}
         <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
         <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
