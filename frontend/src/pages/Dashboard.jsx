@@ -11,7 +11,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      const token = localStorage.getItem("access_token");
+      const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
 
       if (!token) {
         navigate("/login");
@@ -40,34 +40,39 @@ export default function Dashboard() {
     });
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div className="text-center py-10">Loading...</div>;
+  if (error) return <div className="text-center py-10 text-red-600">{error}</div>;
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold">Welcome to CleanCloud Dashboard</h1>
-      <p className="mt-2">Your secure AWS cleanup assistant</p>
-
-      <div className="mt-4">
-        <h2 className="text-lg font-semibold">User Data:</h2>
-        <pre className="mt-2 bg-gray-100 p-4 rounded">{JSON.stringify(userData, null, 2)}</pre>
+    <div className="p-8 max-w-3xl mx-auto">
+      <div className="bg-blue-100 p-6 rounded-lg shadow">
+        <h1 className="text-3xl font-bold text-blue-800 text-center mb-2">Welcome to Tech Solution</h1>
+        <p className="text-center text-gray-700">Choose your service</p>
       </div>
 
-      {/* AWS Options */}
-      <div className="mt-8 space-y-4">
+      {/* Services */}
+      <div className="mt-10 grid gap-6">
         <button
           onClick={() => handleServiceClick("idle")}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full"
+          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded text-lg shadow-md w-full"
         >
           Cloud Idle Resources
         </button>
 
         <button
           onClick={() => handleServiceClick("audit")}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded w-full"
+          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded text-lg shadow-md w-full"
         >
           Cloud Audit Accountability
         </button>
+      </div>
+
+      {/* User Info (optional) */}
+      <div className="mt-10">
+        <h2 className="text-lg font-semibold mb-2">User Info:</h2>
+        <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto">
+          {JSON.stringify(userData, null, 2)}
+        </pre>
       </div>
     </div>
   );
