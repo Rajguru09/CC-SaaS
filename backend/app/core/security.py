@@ -1,4 +1,5 @@
-#backend/app/core/security.py
+# backend/app/core/security.py
+
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
@@ -10,7 +11,7 @@ logger = logging.getLogger(__name__)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Function to create an access token (JWT)
-def create_access_token(data: dict, expires_delta: int = 3600):
+def create_access_token(data: dict, expires_delta: int = 3600) -> str:
     """
     Creates an access token with an expiration time.
     :param data: The data to be encoded in the JWT (e.g., user email, UID).
@@ -22,6 +23,7 @@ def create_access_token(data: dict, expires_delta: int = 3600):
     to_encode.update({"exp": expire})
 
     try:
+        # Encode the JWT with the secret key and algorithm
         token = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
         logger.info(f"Access token successfully created for user: {data.get('sub')}.")
         return token
@@ -49,7 +51,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         return is_verified
     except Exception as e:
         logger.error(f"Error verifying password: {e}")
-        raise Exception("Error verifying password.")
+        raise Exception("Error verifying password due to an internal issue.")
 
 # Function to hash a plain password using bcrypt
 def hash_password(password: str) -> str:
@@ -64,4 +66,4 @@ def hash_password(password: str) -> str:
         return hashed_pw
     except Exception as e:
         logger.error(f"Error hashing password: {e}")
-        raise Exception("Error hashing password.")
+        raise Exception("Error hashing password due to an internal issue.")
