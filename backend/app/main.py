@@ -1,19 +1,22 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import auth, users
+import os
+
+# Set up logging
+logger = logging.getLogger("uvicorn")
+logger.setLevel(logging.INFO)
 
 app = FastAPI()
 
 # Update this based on where your frontend is served
-allowed_origins = [
-    "http://localhost:3001",         # ✅ Vite local dev
-    "http://172.19.108.220:3001",    # ✅ LAN IP if accessing from other devices
-    "https://yourfrontenddomain.com" # Optional production domain
-]
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3001").split(',')
 
+# Add middleware for handling CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=allowed_origins,  # Allow origins dynamically
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,4 +28,10 @@ app.include_router(users.router, prefix="/users")
 
 @app.get("/")
 def root():
+    logger.info("Root endpoint hit.")
     return {"message": "Welcome to CleanCloud backend! The server is up and running."}
+
+@app.get("/health")
+def health_check():
+    logger.info("Health check endpoint hit.")
+    return {"status": "healthy"}
