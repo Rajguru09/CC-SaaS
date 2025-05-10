@@ -1,18 +1,19 @@
 // frontend/src/pages/Login.jsx
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../components/services/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Redirect to dashboard if already logged in
+  // Redirect if already logged in
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
+    const token = localStorage.getItem("access_token") || sessionStorage.getItem("access_token");
     if (token) {
       navigate("/dashboard");
     }
@@ -26,7 +27,6 @@ export default function Login() {
       return;
     }
 
-    // Email format validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError("Please enter a valid email address.");
@@ -40,7 +40,10 @@ export default function Login() {
       const response = await loginUser({ email, password });
 
       if (response?.access_token) {
-        localStorage.setItem("access_token", response.access_token);
+        // Save token to either localStorage or sessionStorage
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem("access_token", response.access_token);
+
         setEmail("");
         setPassword("");
         setLoading(false);
@@ -75,7 +78,6 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            aria-label="Email"
           />
 
           <label htmlFor="password" className="sr-only">Password</label>
@@ -87,8 +89,22 @@ export default function Login() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            aria-label="Password"
           />
+
+          <div className="flex items-center justify-between mb-4">
+            <label className="flex items-center text-sm">
+              <input
+                type="checkbox"
+                className="mr-2"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+              Remember Me
+            </label>
+            <Link to="/forgot-password" className="text-blue-600 text-sm hover:underline">
+              Forgot Password?
+            </Link>
+          </div>
 
           <button
             className="bg-blue-600 text-white px-4 py-2 w-full rounded"
