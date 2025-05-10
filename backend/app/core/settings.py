@@ -13,3 +13,4 @@ class Settings(BaseSettings):
 
 # Initialize the settings instance
 settings = Settings()
+print(settings.JWT_SECRET_KEY)
