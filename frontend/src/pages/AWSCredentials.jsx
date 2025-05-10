@@ -1,4 +1,3 @@
-// frontend/src/pages/AWSCredentials.jsx
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -10,11 +9,24 @@ export default function AWSCredentials() {
   const location = useLocation();
   const redirectTo = location.state?.redirectTo || "/dashboard";
 
+  // Basic AWS Access Key and Secret Key format validation (optional)
+  const validateAWSCredentialsFormat = (accessKey, secretKey) => {
+    const accessKeyPattern = /^AKIA[0-9A-Z]{16}$/; // Simple regex for AWS Access Key
+    const secretKeyPattern = /^[0-9a-zA-Z+/=]{40}$/; // Simple regex for AWS Secret Key
+    return accessKeyPattern.test(accessKey) && secretKeyPattern.test(secretKey);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Check if the AWS keys are entered and follow the expected format
     if (!accessKey || !secretKey) {
       setError("Both AWS Access Key and Secret Key are required.");
+      return;
+    }
+
+    if (!validateAWSCredentialsFormat(accessKey, secretKey)) {
+      setError("Invalid AWS Access Key or Secret Key format.");
       return;
     }
 
@@ -29,7 +41,7 @@ export default function AWSCredentials() {
         setError("Invalid AWS credentials. Please try again.");
       }
     } catch (err) {
-      setError("An error occurred while verifying credentials.");
+      setError("An error occurred while verifying credentials. Please try again.");
     }
   };
 
