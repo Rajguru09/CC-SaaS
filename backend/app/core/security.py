@@ -1,17 +1,21 @@
 # backend/app/core/security.py
-
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
+from fastapi import HTTPException, Security, Depends
+from app.models.user import User
 from app.core.config import settings
+from app.core.db import table
 import logging
 
 # Set up logger for better debugging and error handling
 logger = logging.getLogger(__name__)
+
+# Initialize password context for hashing and verifying passwords
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Function to create an access token (JWT)
-def create_access_token(data: dict, expires_delta: int = 3600) -> str:
+def create_access_token(data: dict, expires_delta: int = 3600):
     """
     Creates an access token with an expiration time.
     :param data: The data to be encoded in the JWT (e.g., user email, UID).
@@ -23,7 +27,6 @@ def create_access_token(data: dict, expires_delta: int = 3600) -> str:
     to_encode.update({"exp": expire})
 
     try:
-        # Encode the JWT with the secret key and algorithm
         token = jwt.encode(to_encode, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
         logger.info(f"Access token successfully created for user: {data.get('sub')}.")
         return token
@@ -51,7 +54,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         return is_verified
     except Exception as e:
         logger.error(f"Error verifying password: {e}")
-        raise Exception("Error verifying password due to an internal issue.")
+        raise Exception("Error verifying password.")
 
 # Function to hash a plain password using bcrypt
 def hash_password(password: str) -> str:
@@ -66,4 +69,43 @@ def hash_password(password: str) -> str:
         return hashed_pw
     except Exception as e:
         logger.error(f"Error hashing password: {e}")
-        raise Exception("Error hashing password due to an internal issue.")
+        raise Exception("Error hashing password.")
+
+# Function to decode JWT token and extract user info
+def decode_jwt(token: str):
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        return payload
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+# Dependency to get the current user from the JWT token
+def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """
+    Extracts the user from the JWT token.
+    :param token: The JWT token passed in the request header.
+    :return: The User object corresponding to the JWT token's subject (UID).
+    """
+    try:
+        payload = decode_jwt(token)
+        user = get_user_by_uid(payload["sub"])  # Fetch user from database using UID (assuming 'sub' is UID)
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        return user
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error extracting user from token: {str(e)}")
+
+# Helper function to retrieve a user from the database using UID
+def get_user_by_uid(uid: str) -> User:
+    try:
+        response = table.get_item(Key={"uid": uid})
+        user = response.get("Item")
+        
+        if not user:
+            return None
+        
+        return User(**user)  # Assuming the user data matches the User model structure
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching user: {str(e)}")
