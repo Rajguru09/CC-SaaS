@@ -1,21 +1,38 @@
-// frontend/src/components/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Signup from "../pages/Signup";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import Settings from "../pages/Settings";
+import jwtDecode from 'jwt-decode'; // For decoding JWT token
 
-// Protected route component
+// Protected route component with token expiry check
 const ProtectedRoute = ({ element }) => {
-  const isAuthenticated = localStorage.getItem("access_token"); // Check if user is authenticated
-  return isAuthenticated ? element : <Navigate to="/login" replace />;
+  const token = localStorage.getItem("access_token");
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  try {
+    const decodedToken = jwtDecode(token);
+    const isExpired = decodedToken.exp * 1000 < Date.now(); // JWT expiration time is in seconds, convert to milliseconds
+
+    if (isExpired) {
+      localStorage.removeItem("access_token"); // Remove expired token
+      return <Navigate to="/login" replace />;
+    }
+  } catch (error) {
+    localStorage.removeItem("access_token"); // Remove invalid token
+    return <Navigate to="/login" replace />;
+  }
+
+  return element;
 };
 
 function App() {
   const [loading, setLoading] = React.useState(true);
 
-  // Simulating a loading state (e.g., data fetching, auth check)
   React.useEffect(() => {
     setTimeout(() => {
       setLoading(false);
@@ -23,7 +40,7 @@ function App() {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; // Show a loading spinner or message
+    return <div>Loading...</div>;
   }
 
   return (
@@ -37,7 +54,6 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
         <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
         
-        {/* Optional catch-all route for 404 */}
         <Route path="*" element={<h2>Oops! 404 - Page Not Found <a href="/login">Go to Login</a></h2>} />
       </Routes>
     </Router>
