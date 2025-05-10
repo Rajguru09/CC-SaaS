@@ -27,6 +27,17 @@ const createHeaders = (token = null) => {
   return headers;
 };
 
+// Timeout helper function for API requests
+const fetchWithTimeout = (url, options, timeout = 5000) => {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("Request timed out")), timeout);
+    fetch(url, options)
+      .then(resolve)
+      .catch(reject)
+      .finally(() => clearTimeout(timer));
+  });
+};
+
 // Generic fetch API function to reduce redundancy
 const fetchAPI = async (url, method, data = null, token = null) => {
   const options = {
@@ -40,7 +51,7 @@ const fetchAPI = async (url, method, data = null, token = null) => {
   }
 
   try {
-    const res = await fetch(`${API_BASE_URL}${url}`, options);
+    const res = await fetchWithTimeout(`${API_BASE_URL}${url}`, options);
     return await handleResponse(res); // Wait and return the response data
   } catch (err) {
     throw new Error(`Error: ${err.message}`);
@@ -65,3 +76,13 @@ export async function loginUser(userData) {
 export async function getUserDashboard(token) {
   return fetchAPI('/users/dashboard', 'GET', null, token);
 }
+
+// Helper function to check token expiry
+export const isTokenExpired = (token) => {
+  try {
+    const decodedToken = jwtDecode(token);
+    return decodedToken.exp * 1000 < Date.now(); // JWT expiration time is in seconds, convert to milliseconds
+  } catch (error) {
+    return true; // If there's any error decoding, consider it expired
+  }
+};
