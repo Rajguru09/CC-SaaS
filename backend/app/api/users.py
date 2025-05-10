@@ -2,6 +2,11 @@ from fastapi import APIRouter, HTTPException, Depends
 from app.core.db import table
 from app.models.user import User
 from app.core.security import get_current_user  # Assuming you have a function to get current user from JWT
+import logging
+
+# Initialize logger
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 router = APIRouter()
 
@@ -16,6 +21,7 @@ async def get_users():
         
         return {"users": users}
     except Exception as e:
+        logger.error(f"Error fetching users: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching users: {str(e)}")
 
 @router.get("/{email}")
@@ -30,6 +36,7 @@ async def get_user(email: str):
         
         return {"user": user}
     except Exception as e:
+        logger.error(f"Error fetching user with email {email}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching user: {str(e)}")
 
 # Dashboard route - fetch user data for the logged-in user
@@ -43,6 +50,8 @@ async def get_dashboard(user: User = Depends(get_current_user)):  # Assuming you
         if 'Item' not in response:
             raise HTTPException(status_code=404, detail="User data not found")
         
+        logger.info(f"Fetched dashboard data for user {user.uid}")
         return {"dashboard": response["Item"]}  # Customize based on your dashboard data
     except Exception as e:
+        logger.error(f"Error fetching dashboard for user {user.uid}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error fetching dashboard: {str(e)}")
