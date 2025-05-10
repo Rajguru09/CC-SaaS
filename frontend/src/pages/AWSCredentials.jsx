@@ -10,16 +10,44 @@ export default function AWSCredentials() {
   const location = useLocation();
   const redirectTo = location.state?.redirectTo || "/dashboard";
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Example validation logic (in real-world, send to backend)
-    if (accessKey === "demo-access" && secretKey === "demo-secret") {
-      localStorage.setItem("aws_access_key", accessKey);
-      localStorage.setItem("aws_secret_key", secretKey);
-      navigate(redirectTo); // Go to the intended page (IdleResources / CloudAudit)
-    } else {
-      setError("Please enter correct access");
+    // Basic client-side validation (You can replace it with actual backend API validation)
+    if (!accessKey || !secretKey) {
+      setError("Both AWS Access Key and Secret Key are required.");
+      return;
+    }
+
+    try {
+      // Example: Make API request to verify AWS credentials
+      const isValidCredentials = await validateAWSCredentials(accessKey, secretKey);
+      
+      if (isValidCredentials) {
+        localStorage.setItem("aws_access_key", accessKey);
+        localStorage.setItem("aws_secret_key", secretKey);
+        navigate(redirectTo); // Redirect based on previous page
+      } else {
+        setError("Invalid AWS credentials. Please try again.");
+      }
+    } catch (err) {
+      setError("An error occurred while verifying credentials.");
+    }
+  };
+
+  const validateAWSCredentials = async (accessKey, secretKey) => {
+    // Replace with a real backend API call to validate the AWS credentials
+    try {
+      const response = await fetch("/api/validate-aws-credentials", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accessKey, secretKey }),
+      });
+      const data = await response.json();
+      return data.isValid; // Assuming the backend returns { isValid: true } or { isValid: false }
+    } catch (err) {
+      console.error("Error validating credentials:", err);
+      return false;
     }
   };
 
