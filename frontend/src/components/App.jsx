@@ -1,13 +1,20 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  Link,
+} from "react-router-dom";
 import Signup from "../pages/Signup";
 import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import Settings from "../pages/Settings";
-import jwtDecode from 'jwt-decode'; // For decoding JWT token
+import jwtDecode from "jwt-decode";
 
-// Protected route component with token expiry check
-const ProtectedRoute = ({ element }) => {
+// Protected Route
+const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("access_token");
   const location = useLocation();
 
@@ -17,18 +24,18 @@ const ProtectedRoute = ({ element }) => {
 
   try {
     const decodedToken = jwtDecode(token);
-    const isExpired = decodedToken.exp * 1000 < Date.now(); // JWT expiration time is in seconds, convert to milliseconds
+    const isExpired = decodedToken.exp * 1000 < Date.now();
 
     if (isExpired) {
-      localStorage.removeItem("access_token"); // Remove expired token
+      localStorage.removeItem("access_token");
       return <Navigate to="/login" state={{ from: location }} replace />;
     }
   } catch (error) {
-    localStorage.removeItem("access_token"); // Remove invalid token
+    localStorage.removeItem("access_token");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return element;
+  return children;
 };
 
 function App() {
@@ -37,7 +44,7 @@ function App() {
   React.useEffect(() => {
     setTimeout(() => {
       setLoading(false);
-    }, 1000); // Simulate loading for 1 second
+    }, 1000);
   }, []);
 
   if (loading) {
@@ -50,12 +57,30 @@ function App() {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-
-        {/* Protected routes */}
-        <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
-        <Route path="/settings" element={<ProtectedRoute element={<Settings />} />} />
-        
-        <Route path="*" element={<h2>Oops! 404 - Page Not Found <a href="/login">Go to Login</a></h2>} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="*"
+          element={
+            <h2>
+              Oops! 404 - Page Not Found. <Link to="/login">Go to Login</Link>
+            </h2>
+          }
+        />
       </Routes>
     </Router>
   );
