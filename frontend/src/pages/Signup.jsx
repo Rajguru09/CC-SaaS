@@ -1,5 +1,5 @@
 // frontend/src/pages/Signup.jsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupUser } from "../components/services/api";
 
@@ -11,18 +11,9 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Redirect if user is already logged in
-  useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      navigate("/dashboard");
-    }
-  }, [navigate]);
-
   const handleSignup = async (e) => {
     e.preventDefault();
 
-    // Input validations
     if (!email || !password || !confirmPassword) {
       setError("Please fill in all fields.");
       return;
@@ -33,45 +24,35 @@ export default function Signup() {
       return;
     }
 
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError("Please enter a valid email.");
-      return;
-    }
-
-    // Password strength validation
-    if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password)) {
-      setError("Password must be at least 8 characters, include an uppercase letter and a number.");
+      setError("Please enter a valid email address.");
       return;
     }
 
     setLoading(true);
-    setError(null); // Clear previous errors
+    setError(null);
 
     try {
-      const response = await signupUser({ email, password, confirm_password: confirmPassword });
+      const response = await signupUser({ email, password });
 
       if (response?.access_token) {
         localStorage.setItem("access_token", response.access_token);
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
         setLoading(false);
-        setError(null);
-        navigate("/login"); // Redirect after successful signup
+        navigate("/dashboard");
       } else {
         setLoading(false);
-        setError(response?.detail || "Signup failed.");
+        setError(response?.detail || "Signup failed. Please try again.");
       }
     } catch (err) {
       setLoading(false);
-      setError("An error occurred. Please try again.");
+      setError(err?.response?.data?.detail || "An error occurred. Please try again.");
     }
   };
 
   return (
     <div className="p-8 max-w-sm mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-6">Welcome to Tech Solution</h2>
+      <h2 className="text-2xl font-bold text-center mb-6">Create Your Account</h2>
 
       <div className="bg-white p-6 shadow-md rounded-lg">
         <h3 className="text-xl font-semibold mb-4 text-center">Sign Up</h3>
@@ -88,7 +69,6 @@ export default function Signup() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            aria-label="Email"
           />
 
           <label htmlFor="password" className="sr-only">Password</label>
@@ -100,19 +80,17 @@ export default function Signup() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            aria-label="Password"
           />
 
-          <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
+          <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
           <input
-            id="confirmPassword"
+            id="confirm-password"
             className="border p-2 w-full mb-4"
             type="password"
             placeholder="Confirm Password"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             required
-            aria-label="Confirm Password"
           />
 
           <button
