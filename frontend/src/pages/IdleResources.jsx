@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { getIdleResources } from "../components/services/api";  // Assume this function fetches idle resources
+import { getIdleResources, deleteResource, retainResource } from "../components/services/api";  // Assume these functions interact with the backend API
 import { useNavigate } from "react-router-dom";
 
 export default function IdleResources() {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null); // Track action-specific loading state
   const navigate = useNavigate();
 
   // Fetch idle resources on component mount
@@ -31,14 +32,22 @@ export default function IdleResources() {
     fetchIdleResources();
   }, [navigate]);
 
-  const handleAction = (resourceId, action) => {
-    // Define what happens when the user takes action on a resource (Delete or Retain)
-    if (action === "delete") {
-      // Perform delete action for the resource (API call)
-      alert(`Resource ${resourceId} will be deleted.`);
-    } else if (action === "retain") {
-      // Perform retain action for the resource (API call)
-      alert(`Resource ${resourceId} will be retained.`);
+  const handleAction = async (resourceId, action) => {
+    setActionLoading(resourceId); // Set loading state for this specific resource action
+
+    try {
+      if (action === "delete") {
+        await deleteResource(resourceId); // Call delete API
+        setResources((prevResources) => prevResources.filter((resource) => resource.id !== resourceId));
+        alert(`Resource ${resourceId} deleted successfully.`);
+      } else if (action === "retain") {
+        await retainResource(resourceId); // Call retain API
+        alert(`Resource ${resourceId} retained.`);
+      }
+    } catch (err) {
+      alert(`Failed to ${action} resource ${resourceId}: ${err.message}`);
+    } finally {
+      setActionLoading(null); // Reset loading state after action is complete
     }
   };
 
@@ -66,14 +75,16 @@ export default function IdleResources() {
                 <button
                   onClick={() => handleAction(resource.id, "delete")}
                   className="bg-red-600 text-white px-4 py-2 rounded"
+                  disabled={actionLoading === resource.id} // Disable while action is in progress
                 >
-                  Delete
+                  {actionLoading === resource.id ? "Deleting..." : "Delete"}
                 </button>
                 <button
                   onClick={() => handleAction(resource.id, "retain")}
                   className="bg-green-600 text-white px-4 py-2 rounded"
+                  disabled={actionLoading === resource.id} // Disable while action is in progress
                 >
-                  Retain
+                  {actionLoading === resource.id ? "Retaining..." : "Retain"}
                 </button>
               </div>
             </div>
