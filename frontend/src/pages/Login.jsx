@@ -1,4 +1,3 @@
-// frontend/src/pages/Login.jsx
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { loginUser } from "../components/services/api";
@@ -114,6 +113,10 @@ export default function Login() {
             {loading ? "Logging in..." : "Log In"}
           </button>
         </form>
+
+        <div className="mt-4 text-center">
+          <p className="text-sm">New user? <Link to="/signup" className="text-blue-600 hover:underline">Sign Up</Link></p>
+        </div>
       </div>
     </div>
   );
