@@ -1,16 +1,15 @@
-import os
-from pydantic_settings import BaseSettings  # ✅ FIXED
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-    AWS_REGION: str = "ap-south-1"  # Default to ap-south-1, but can be overridden via .env
-    DYNAMODB_USERS_TABLE_NAME: str = "users"  # Default DynamoDB table name
-    JWT_SECRET_KEY: str  # JWT Secret Key, should be set in environment variables
-    JWT_ALGORITHM: str = "HS256"  # Default algorithm
+    AWS_REGION: str = "ap-south-1"
+    DYNAMODB_USERS_TABLE_NAME: str = "users"
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str = "HS256"
 
-    class Config:
-        env_file = ".env"  # Specifies the environment file to load variables from
-        env_file_encoding = 'utf-8'  # Specifies the encoding for the environment file
+    model_config = SettingsConfigDict(
+        env_file="app/core/.env",  # Path to your .env file
+        env_file_encoding="utf-8"
+    )
 
 # Initialize the settings instance
 settings = Settings()
-print(settings.JWT_SECRET_KEY)
