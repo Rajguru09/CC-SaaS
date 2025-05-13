@@ -32,12 +32,8 @@ export default function Dashboard() {
   }, [navigate]);
 
   const handleServiceClick = (service) => {
-    const redirectTo =
-      service === "idle" ? "/idle-resources" : "/cloud-audit";
-
-    navigate("/aws-credentials", {
-      state: { redirectTo },
-    });
+    const redirectTo = service === "idle" ? "/idle-resources" : "/cloud-audit";
+    navigate("/aws-credentials", { state: { redirectTo } });
   };
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
@@ -52,19 +48,25 @@ export default function Dashboard() {
 
       {/* Services */}
       <div className="mt-10 grid gap-6">
-        <button
-          onClick={() => handleServiceClick("idle")}
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded text-lg shadow-md w-full"
-        >
-          Cloud Idle Resources
-        </button>
+        {userData?.services?.includes("idle") && (
+          <button
+            onClick={() => handleServiceClick("idle")}
+            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded text-lg shadow-md w-full"
+            aria-label="Manage Cloud Idle Resources"
+          >
+            Cloud Idle Resources
+          </button>
+        )}
 
-        <button
-          onClick={() => handleServiceClick("audit")}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded text-lg shadow-md w-full"
-        >
-          Cloud Audit Accountability
-        </button>
+        {userData?.services?.includes("audit") && (
+          <button
+            onClick={() => handleServiceClick("audit")}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded text-lg shadow-md w-full"
+            aria-label="Manage Cloud Audit Accountability"
+          >
+            Cloud Audit Accountability
+          </button>
+        )}
       </div>
 
       {/* User Info (optional) */}
