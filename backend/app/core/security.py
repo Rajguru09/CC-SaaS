@@ -1,4 +1,5 @@
-from fastapi import Depends  # Add this import
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from app.core.settings import settings
 from passlib.context import CryptContext
 from jose import JWTError, jwt
@@ -7,6 +8,9 @@ from typing import Optional
 
 # Initialize password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Initialize OAuth2PasswordBearer
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # JWT Secret and Algorithm from settings
 SECRET_KEY = settings.JWT_SECRET_KEY
