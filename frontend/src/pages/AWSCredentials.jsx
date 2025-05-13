@@ -5,6 +5,7 @@ export default function AWSCredentials() {
   const [accessKey, setAccessKey] = useState("");
   const [secretKey, setSecretKey] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);  // Added loading state
   const navigate = useNavigate();
   const location = useLocation();
   const redirectTo = location.state?.redirectTo || "/dashboard";
@@ -30,6 +31,8 @@ export default function AWSCredentials() {
       return;
     }
 
+    setLoading(true);  // Set loading to true before API call
+
     try {
       const isValidCredentials = await validateAWSCredentials(accessKey, secretKey);
 
@@ -42,6 +45,8 @@ export default function AWSCredentials() {
       }
     } catch (err) {
       setError("An error occurred while verifying credentials. Please try again.");
+    } finally {
+      setLoading(false);  // Set loading to false after API call
     }
   };
 
@@ -93,8 +98,9 @@ export default function AWSCredentials() {
         <button
           type="submit"
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 w-full rounded"
+          disabled={loading}  // Disable button while loading
         >
-          Connect
+          {loading ? "Connecting..." : "Connect"}
         </button>
       </form>
     </div>
