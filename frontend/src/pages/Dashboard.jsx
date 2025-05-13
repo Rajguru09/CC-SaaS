@@ -1,4 +1,3 @@
-// frontend/src/pages/Dashboard.jsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getUserDashboard } from "../components/services/api";
@@ -33,7 +32,16 @@ export default function Dashboard() {
 
   const handleServiceClick = (service) => {
     const redirectTo = service === "idle" ? "/idle-resources" : "/cloud-audit";
-    navigate("/aws-credentials", { state: { redirectTo } });
+
+    // Check if AWS credentials are provided before navigating
+    const awsCredentials = localStorage.getItem("aws_credentials") || sessionStorage.getItem("aws_credentials");
+    if (!awsCredentials) {
+      // If no credentials, redirect to AWS credentials page
+      navigate("/aws-credentials", { state: { redirectTo } });
+    } else {
+      // Navigate directly to the service
+      navigate(redirectTo);
+    }
   };
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
@@ -48,7 +56,7 @@ export default function Dashboard() {
 
       {/* Services */}
       <div className="mt-10 grid gap-6">
-        {userData?.services?.includes("idle") && (
+        {userData?.services?.includes("idle") ? (
           <button
             onClick={() => handleServiceClick("idle")}
             className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded text-lg shadow-md w-full"
@@ -56,9 +64,11 @@ export default function Dashboard() {
           >
             Cloud Idle Resources
           </button>
+        ) : (
+          <p className="text-center text-gray-500">Cloud Idle Resources not available</p>
         )}
 
-        {userData?.services?.includes("audit") && (
+        {userData?.services?.includes("audit") ? (
           <button
             onClick={() => handleServiceClick("audit")}
             className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded text-lg shadow-md w-full"
@@ -66,6 +76,8 @@ export default function Dashboard() {
           >
             Cloud Audit Accountability
           </button>
+        ) : (
+          <p className="text-center text-gray-500">Cloud Audit Accountability not available</p>
         )}
       </div>
 
